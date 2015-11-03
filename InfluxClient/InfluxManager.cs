@@ -40,7 +40,9 @@ namespace InfluxClient
             string url = string.Format("{0}/write?db={1}", _baseUrl, _database);
 
             //  Create our data to post:
-            HttpContent content = new StringContent(Serialize(dataToWrite));
+            //  We were calling serialize, but the JSON protocol is depcrecated.  We should
+            //  be using the line protocol: https://influxdb.com/docs/v0.9/write_protocols/line.html
+            // HttpContent content = new StringContent(Serialize(dataToWrite));
 
             //  Make an async call to get the response
             return await client.PostAsync(url, content);
@@ -63,50 +65,6 @@ namespace InfluxClient
 
             //  Deserialize and return
             return Deserialize<T>(objString);
-        }
-
-        /// <summary>
-        /// Deserializes the JSON string to the given type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="objString"></param>
-        /// <returns></returns>
-        private T Deserialize<T>(string objString)
-        {
-            using(var stream = new MemoryStream(Encoding.Unicode.GetBytes(objString)))
-            {
-                var serializer = new DataContractJsonSerializer(typeof(T));
-                return (T)serializer.ReadObject(stream);
-            }
-        }
-
-        /// <summary>
-        /// Serialize an object to JSON
-        /// </summary>
-        /// <param name="objToSerialize"></param>
-        /// <returns></returns>
-        public string Serialize(object objToSerialize)
-        {
-            //  Our return value:
-            string retval = string.Empty;
-
-            using(var stream = new MemoryStream())
-            {
-                var serializer = new DataContractJsonSerializer(objToSerialize.GetType());
-                serializer.WriteObject(stream, objToSerialize);
-                stream.Flush();
-
-                // The StreamReader will read from the current 
-                // position of the MemoryStream which is currently 
-                // set at the end of the string we just wrote to it. 
-                // We need to set the position to 0 in order to read 
-                // from the beginning.
-                stream.Position = 0;
-                var sr = new StreamReader(stream);
-                retval = sr.ReadToEnd();
-            }
-
-            return retval;
         }
 
         #endregion
