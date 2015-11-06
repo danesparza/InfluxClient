@@ -13,12 +13,12 @@ namespace InfluxClient.Tests
             Measurement m = new Measurement()
             {
                 Name = "cpu",
-                Timestamp = DateTime.Parse("10/26/2015 13:48")
+                Timestamp = DateTime.Parse("10/26/2015 13:48Z")
             };
             m.AddTag("host", "server01").AddTag("region", "us-west");
             m.AddField("alarm", false).AddField("Message", "Testing messages");
 
-            string expectedFormat = "cpu,host=server01,region=us-west alarm=false,Message=\"Testing messages\" 1445881680000000000";
+            string expectedFormat = "cpu,host=server01,region=us-west alarm=false,Message=\"Testing messages\" 1445867280000000000";
             string retval = string.Empty;
 
             //  Act
@@ -35,11 +35,11 @@ namespace InfluxClient.Tests
             Measurement m = new Measurement()
             {
                 Name = "cpu",
-                Timestamp = DateTime.Parse("10/26/2015 13:48")
+                Timestamp = DateTime.Parse("10/26/2015 13:48Z")
             };
             m.AddField("alarm", false).AddField("Message", "Testing messages");
 
-            string expectedFormat = "cpu alarm=false,Message=\"Testing messages\" 1445881680000000000";
+            string expectedFormat = "cpu alarm=false,Message=\"Testing messages\" 1445867280000000000";
             string retval = string.Empty;
 
             //  Act
