@@ -41,10 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fields\BooleanField.cs" />
+    <Compile Include="Fields\FloatField.cs" />
+    <Compile Include="Fields\IntegerField.cs" />
+    <Compile Include="Fields\StringField.cs" />
     <Compile Include="InfluxManager.cs" />
     <Compile Include="LineProtocol.cs" />
     <Compile Include="Measurement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tag.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using InfluxClient.Fields;
 
 namespace InfluxClient
 {
@@ -17,14 +15,14 @@ namespace InfluxClient
         public Measurement()
         {
             //  Initialize the lists:
-            Tags = new List<KeyValuePair<string, string>>();
-            IntegerFields = new List<KeyValuePair<string, int>>();
-            FloatFields = new List<KeyValuePair<string, float>>();
-            BooleanFields = new List<KeyValuePair<string, bool>>();
-            StringFields = new List<KeyValuePair<string, string>>();
+            Tags = new List<Tag>();
+            IntegerFields = new List<IntegerField>();
+            FloatFields = new List<FloatField>();
+            BooleanFields = new List<BooleanField>();
+            StringFields = new List<StringField>();
 
             //  Initialize the timestamp
-            Timestamp = DateTime.UtcNow;
+            Timestamp = DateTime.Now;
         }
 
         /// <summary>
@@ -34,52 +32,104 @@ namespace InfluxClient
         { get; set; }
 
         /// <summary>
-        /// Measurement tags
+        /// The list of tags for this measurement
         /// </summary>
-        public List<KeyValuePair<string, string>> Tags
+        public List<Tag> Tags
         { get; set; }
 
         /// <summary>
-        /// Adds a tag
+        /// The list of integer fields for this measurement
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public Measurement AddTag(string key, string value)
-        {
-            this.Tags.Add(new KeyValuePair<string, string>(key, value));
-
-            return this;
-        }
-
-        /// <summary>
-        /// A list of integer fields for this measurement
-        /// </summary>
-        public List<KeyValuePair<string, int>> IntegerFields
+        public List<IntegerField> IntegerFields
         { get; set; }
 
         /// <summary>
         /// A list of float fields for this measurement
         /// </summary>
-        public List<KeyValuePair<string, float>> FloatFields
+        public List<FloatField> FloatFields
         { get; set; }
 
         /// <summary>
         /// A list of boolean fields for this measurement
         /// </summary>
-        public List<KeyValuePair<string, bool>> BooleanFields
+        public List<BooleanField> BooleanFields
         { get; set; }
 
         /// <summary>
         /// A list of string fields for this measurement
         /// </summary>
-        public List<KeyValuePair<string, string>> StringFields
+        public List<StringField> StringFields
         { get; set; }
-
+        
         /// <summary>
         /// The timestamp for this measurement.  Defaults to UTC now
         /// </summary>
         public DateTime Timestamp
         { get; set; }
+
+        #region Helper methods
+
+        /// <summary>
+        /// Adds a tag.  This call is chainable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public Measurement AddTag(string name, string value)
+        {
+            this.Tags.Add(new Tag() { Name = name, Value = value });
+            return this;
+        }
+
+        /// <summary>
+        /// Adds an integer field.  This call is chainable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public Measurement AddField(string name, int value)
+        {
+            this.IntegerFields.Add(new IntegerField() { Name = name, Value = value });
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a float field. This call is chainable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public Measurement AddField(string name, float value)
+        {
+            this.FloatFields.Add(new FloatField() { Name = name, Value = value });
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a boolean field. This call is chainable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public Measurement AddField(string name, bool value)
+        {
+            this.BooleanFields.Add(new BooleanField { Name = name, Value = value });
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a string field. This call is chainable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public Measurement AddField(string name, string value)
+        {
+            this.StringFields.Add(new StringField() { Name = name, Value = value });
+            return this;
+        }
+
+        #endregion
+
     }
 }

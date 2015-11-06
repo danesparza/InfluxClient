@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace InfluxClient
@@ -43,6 +40,11 @@ namespace InfluxClient
 
         #region API helpers
 
+        /// <summary>
+        /// Write a measurement to the InfluxDB database
+        /// </summary>
+        /// <param name="m">The measurement to write.  It must have at least one field specified</param>
+        /// <returns>An awaitable Task containing the HttpResponseMessage returned from the InfluxDB server</returns>
         async public Task<HttpResponseMessage> Write(Measurement m)
         {
             //  Make sure the measurement has at least one field:
@@ -58,13 +60,16 @@ namespace InfluxClient
             string url = string.Format("{0}/write?db={1}", _baseUrl, _database);
 
             //  Create our data to post:
-            //  We were calling serialize, but the JSON protocol is depcrecated.  We should
-            //  be using the line protocol: https://influxdb.com/docs/v0.9/write_protocols/line.html
             HttpContent content = new StringContent(LineProtocol.Format(m));
 
             //  Make an async call to get the response
             HttpClient client = new HttpClient();
             return await client.PostAsync(url, content);
+        }
+
+        async public Task<HttpResponseMessage> Write(List<Measurement> listOfMeasurements)
+        {
+            return null;
         }
 
         #endregion

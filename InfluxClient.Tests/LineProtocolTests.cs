@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace InfluxClient.Tests
@@ -14,10 +13,33 @@ namespace InfluxClient.Tests
             Measurement m = new Measurement()
             {
                 Name = "cpu",
+                Timestamp = DateTime.Parse("10/26/2015 13:48")
             };
             m.AddTag("host", "server01").AddTag("region", "us-west");
-            
-            string expectedFormat = "";
+            m.AddField("alarm", false).AddField("Message", "Testing messages");
+
+            string expectedFormat = "cpu,host=server01,region=us-west alarm=false,Message=\"Testing messages\" 1445881680000000000";
+            string retval = string.Empty;
+
+            //  Act
+            retval = LineProtocol.Format(m);
+
+            //  Assert
+            Assert.AreEqual<string>(expectedFormat, retval);
+        }
+
+        [TestMethod]
+        public void Format_WithNoTags_IsSuccessful()
+        {
+            //  Arrange
+            Measurement m = new Measurement()
+            {
+                Name = "cpu",
+                Timestamp = DateTime.Parse("10/26/2015 13:48")
+            };
+            m.AddField("alarm", false).AddField("Message", "Testing messages");
+
+            string expectedFormat = "cpu alarm=false,Message=\"Testing messages\" 1445881680000000000";
             string retval = string.Empty;
 
             //  Act

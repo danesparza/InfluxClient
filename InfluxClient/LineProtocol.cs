@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace InfluxClient
 {
@@ -23,9 +20,9 @@ namespace InfluxClient
             retval.AppendFormat("{0}", Escape(m.Name));
 
             //  If we have any tags, append them:
-            foreach(var kvp in m.Tags)
+            foreach(var tag in m.Tags)
             {
-                retval.AppendFormat(",{0}={1}", Escape(kvp.Key), Escape(kvp.Value));
+                retval.AppendFormat(",{0}={1}", Escape(tag.Name), Escape(tag.Value));
             }
 
             //  Append a space:
@@ -33,34 +30,35 @@ namespace InfluxClient
 
             //  If we have any fields (we should have at least one), append them:
             //  BOOLEAN FIELDS
-            foreach(var kvp in m.BooleanFields)
+            foreach(var boolField in m.BooleanFields)
             {
-                retval.AppendFormat("{0}={1},", Escape(kvp.Key), Convert.ToString(kvp.Value));
+                retval.AppendFormat("{0}={1},", Escape(boolField.Name), Convert.ToString(boolField.Value).ToLower());
             }
 
             //  FLOAT FIELDS
-            foreach(var kvp in m.FloatFields)
+            foreach(var floatField in m.FloatFields)
             {
-                retval.AppendFormat("{0}={1},", Escape(kvp.Key), kvp.Value);
+                retval.AppendFormat("{0}={1},", Escape(floatField.Name), floatField.Value);
             }
 
             //  INTEGER FIELDS
-            foreach(var kvp in m.IntegerFields)
+            foreach(var intField in m.IntegerFields)
             {
-                retval.AppendFormat("{0}={1}i,", Escape(kvp.Key), kvp.Value);
+                retval.AppendFormat("{0}={1}i,", Escape(intField.Name), intField.Value);
             }
 
             //  STRING FIELDS
-            foreach(var kvp in m.StringFields)
+            foreach(var stringField in m.StringFields)
             {
-                retval.AppendFormat("{0}=\"{1}\",", Escape(kvp.Key), Escape(kvp.Value));
+                retval.AppendFormat("{0}=\"{1}\",", Escape(stringField.Name), EscapeString(stringField.Value));
             }
 
             //  Remove the last trailing comma
             retval.Remove(retval.Length - 1, 1);
 
-            //  Append the timestamp (in micro-seconds past the epoch):
-            retval.AppendFormat(" {0}", ((long)m.Timestamp.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds) * 1000);
+            //  Append the timestamp (in nanoseconds past the epoch):
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);        
+            retval.AppendFormat(" {0}", Convert.ToInt64((m.Timestamp.ToUniversalTime() - epoch).TotalSeconds * 1000000000));
 
             return retval.ToString();
         }
@@ -70,7 +68,7 @@ namespace InfluxClient
         /// </summary>
         /// <param name="stringToEscape">The string to escape</param>
         /// <returns></returns>
-        public static string Escape(string stringToEscape)
+        private static string Escape(string stringToEscape)
         {
             string retval = stringToEscape;
 
@@ -79,6 +77,21 @@ namespace InfluxClient
 
             //  Escape commas
             retval = retval.Replace(",", @"\,");
+
+            return retval;
+        }
+
+        /// <summary>
+        /// Escapes string values properly for the line protocol
+        /// </summary>
+        /// <param name="stringToEscape"></param>
+        /// <returns></returns>
+        private static string EscapeString(string stringToEscape)
+        {
+            string retval = stringToEscape;
+
+            //  Escape double quotes
+            retval = retval.Replace("\"", "\\\"");
 
             return retval;
         }
