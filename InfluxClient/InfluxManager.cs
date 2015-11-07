@@ -64,8 +64,10 @@ namespace InfluxClient
             HttpContent content = new StringContent(LineProtocol.Format(m));
 
             //  Make an async call to get the response
-            HttpClient client = new HttpClient();
-            return await client.PostAsync(url, content);
+            using(HttpClient client = new HttpClient())
+            {
+                return await client.PostAsync(url, content);
+            }
         }
 
         /// <summary>
@@ -105,8 +107,10 @@ namespace InfluxClient
             HttpContent content = new StringContent(sb.ToString());
 
             //  Make an async call to get the response
-            HttpClient client = new HttpClient();
-            return await client.PostAsync(url, content);
+            using(HttpClient client = new HttpClient())
+            {
+                return await client.PostAsync(url, content);
+            }            
         }
 
         #endregion

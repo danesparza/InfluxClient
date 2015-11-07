@@ -51,7 +51,7 @@ namespace InfluxClient.Tests
             Measurement m = new Measurement()
             {
                 Name = "unittest",
-                IntegerFields = new List<Fields.IntegerField>()
+                IntegerFields = new List<IntegerField>()
                 {
                     new IntegerField() { Name="count", Value=44 }
                 },
