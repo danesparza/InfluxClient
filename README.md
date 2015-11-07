@@ -1,5 +1,5 @@
 # InfluxClient
-A .NET InfluxDB client
+A .NET InfluxDB client that supports the [v0.9 API](https://influxdb.com/docs/v0.9/introduction/overview.html) and the [line protocol](https://influxdb.com/docs/v0.9/write_protocols/line.html) for efficient logging
 
 [![Build status](https://ci.appveyor.com/api/projects/status/kab7aiacy0vjv1sr?svg=true)](https://ci.appveyor.com/project/danesparza/influxclient)
 
