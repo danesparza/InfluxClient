@@ -14,6 +14,9 @@ namespace InfluxClient
         /// </summary>
         public Measurement()
         {
+            //  Initialize the name:
+            Name = "Unknown";
+
             //  Initialize the lists:
             Tags = new List<Tag>();
             IntegerFields = new List<IntegerField>();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace InfluxClient
@@ -53,7 +54,7 @@ namespace InfluxClient
                 || m.IntegerFields.Any() 
                 || m.StringFields.Any()))
             {
-                throw new ArgumentException("Measurements need at least one field value");
+                throw new ArgumentException(string.Format("Measurements '{0}' needs at least one field value", m.Name));
             }
 
             //  Create our url to post data to
@@ -67,9 +68,45 @@ namespace InfluxClient
             return await client.PostAsync(url, content);
         }
 
+        /// <summary>
+        /// Writes a list of measurements to the InfluxDB database
+        /// </summary>
+        /// <param name="listOfMeasurements">The list of measurements to write.  Each measurement must have at least one field specified</param>
+        /// <returns>An awaitable Task containing the HttpResponseMessage returned from the InfluxDB server</returns>
         async public Task<HttpResponseMessage> Write(List<Measurement> listOfMeasurements)
         {
-            return null;
+            //  Create our url to post data to
+            string url = string.Format("{0}/write?db={1}", _baseUrl, _database);
+
+            //  Our string to build:
+            StringBuilder sb = new StringBuilder();
+            foreach(var m in listOfMeasurements)
+            {
+                //  Make sure the measurement has at least one field:
+                if(!(m.BooleanFields.Any()
+                    || m.FloatFields.Any()
+                    || m.IntegerFields.Any()
+                    || m.StringFields.Any()))
+                {
+                    throw new ArgumentException(string.Format("Measurements '{0}' needs at least one field value", m.Name));
+                }
+
+                sb.AppendFormat("{0}\n", LineProtocol.Format(m));
+            }
+
+            //  If we had some measurements... 
+            if(listOfMeasurements.Any())
+            {
+                //  Remove the last trailing newline
+                sb.Remove(sb.Length - 1, 1);
+            }
+            
+            //  Create our data to post:
+            HttpContent content = new StringContent(sb.ToString());
+
+            //  Make an async call to get the response
+            HttpClient client = new HttpClient();
+            return await client.PostAsync(url, content);
         }
 
         #endregion
