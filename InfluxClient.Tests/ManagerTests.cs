@@ -11,8 +11,8 @@ namespace InfluxClient.Tests
     [TestClass]
     public class ManagerTests
     {
-        string influxEndpoint = "http://linux-dev:8086/";
-        string influxDatabase = "cb_stats";
+        string influxEndpoint = "http://YOURSERVER:8086/";
+        string influxDatabase = "YOUR_DATABASE";
         string influxUser = "unittest";
         string influxPassword = "unittest";
 
@@ -77,7 +77,7 @@ namespace InfluxClient.Tests
         /// (Just uncomment the [TestMethod] attribute and rebuild)
         /// </summary>
         /// <returns></returns>
-        [TestMethod]
+        // [TestMethod]
         public async Task Write_WithCredentialsAndValidMeasurementFields_IsSuccessful()
         {
             //  Arrange
