@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +23,17 @@ namespace InfluxClient
         private string _database = "";
 
         /// <summary>
-        /// Creates a new Influx manager
+        /// User name to use
+        /// </summary>
+        private string _username = "";
+
+        /// <summary>
+        /// Password to use
+        /// </summary>
+        private string _password = "";
+
+        /// <summary>
+        /// Creates a new InfluxDB manager
         /// </summary>
         /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
         /// <param name="database">The database to write to</param>
@@ -35,11 +46,23 @@ namespace InfluxClient
             //  Set the base url and database:
             _baseUrl = influxEndpoint;
             _database = database;
-        } 
+        }
+
+        /// <summary>
+        /// Creates a new InfuxDB manager with authentication credentials
+        /// </summary>
+        /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
+        /// <param name="database">The database to write to</param>
+        /// <param name="username">The username to authenticate with</param>
+        /// <param name="password">The password to authenticate with</param>
+        public InfluxManager(string influxEndpoint, string database, string username, string password) : this(influxEndpoint, database)
+        {
+            //  Set the username and password:
+            _username = username;
+            _password = password;
+        }
 
         #endregion
-
-        #region API helpers
 
         /// <summary>
         /// Write a measurement to the InfluxDB database
@@ -49,12 +72,12 @@ namespace InfluxClient
         async public Task<HttpResponseMessage> Write(Measurement m)
         {
             //  Make sure the measurement has at least one field:
-            if(!(m.BooleanFields.Any() 
-                || m.FloatFields.Any() 
-                || m.IntegerFields.Any() 
+            if(!(m.BooleanFields.Any()
+                || m.FloatFields.Any()
+                || m.IntegerFields.Any()
                 || m.StringFields.Any()))
             {
-                throw new ArgumentException(string.Format("Measurements '{0}' needs at least one field value", m.Name));
+                throw new ArgumentException(string.Format("Measurement '{0}' needs at least one field value", m.Name));
             }
 
             //  Create our url to post data to
@@ -66,6 +89,10 @@ namespace InfluxClient
             //  Make an async call to get the response
             using(HttpClient client = new HttpClient())
             {
+                if(CredentialsHaveBeenSet())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetHttpBasicAuthCredentials());
+                }
                 return await client.PostAsync(url, content);
             }
         }
@@ -90,7 +117,7 @@ namespace InfluxClient
                     || m.IntegerFields.Any()
                     || m.StringFields.Any()))
                 {
-                    throw new ArgumentException(string.Format("Measurements '{0}' needs at least one field value", m.Name));
+                    throw new ArgumentException(string.Format("Measurement '{0}' needs at least one field value", m.Name));
                 }
 
                 sb.AppendFormat("{0}\n", LineProtocol.Format(m));
@@ -102,15 +129,61 @@ namespace InfluxClient
                 //  Remove the last trailing newline
                 sb.Remove(sb.Length - 1, 1);
             }
-            
+
             //  Create our data to post:
             HttpContent content = new StringContent(sb.ToString());
 
             //  Make an async call to get the response
             using(HttpClient client = new HttpClient())
             {
+                if(CredentialsHaveBeenSet())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetHttpBasicAuthCredentials());
+                }
                 return await client.PostAsync(url, content);
+            }
+        }
+
+        #region API helpers
+
+        /// <summary>
+        /// Gets InfluxDB credentials in HTTP basic auth format 
+        /// if they have been set.  Returns an empty string if they have not
+        /// </summary>
+        /// <returns></returns>
+        private string GetHttpBasicAuthCredentials()
+        {
+            string retval = string.Empty;
+
+            //  If the username and password aren't empty ... 
+            if(CredentialsHaveBeenSet())
+            {
+                //  ... Format the username/password string
+                byte[] byteArray = Encoding.ASCII.GetBytes(
+                    string.Format("{0}:{1}", _username, _password)
+                    );
+
+                //  base 64 encode the string
+                retval = Convert.ToBase64String(byteArray);
             }            
+
+            return retval;
+        }
+
+        /// <summary>
+        /// Returns 'true' if credentials have been set, false if they haven't
+        /// </summary>
+        /// <returns></returns>
+        private bool CredentialsHaveBeenSet()
+        {
+            bool retval = false;
+
+            if(!string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password))
+            {
+                retval = true;
+            }
+
+            return retval;
         }
 
         #endregion

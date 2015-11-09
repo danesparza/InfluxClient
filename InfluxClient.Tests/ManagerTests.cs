@@ -13,6 +13,8 @@ namespace InfluxClient.Tests
     {
         string influxEndpoint = "http://YOURSERVER:8086/";
         string influxDatabase = "YOUR_DATABASE";
+        string influxUser = "unittest";
+        string influxPassword = "unittest";
 
         /// <summary>
         /// This test just verifies the field arguments.  It shouldn't matter
@@ -48,6 +50,38 @@ namespace InfluxClient.Tests
         {
             //  Arrange
             InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase);
+            Measurement m = new Measurement()
+            {
+                Name = "unittest",
+                IntegerFields = new List<IntegerField>()
+                {
+                    new IntegerField() { Name="count", Value=44 }
+                },
+                Timestamp = DateTime.Parse("10/26/2015 13:48")
+            };
+
+            //  Act
+            Task<HttpResponseMessage> asyncretval = mgr.Write(m);
+            Debug.WriteLine(DateTime.Now); // Log the time right after the call:
+
+            HttpResponseMessage retval = await asyncretval; // Await the return
+            Debug.WriteLine(DateTime.Now); // Log the time right after the return:
+
+            //  Assert
+            Assert.IsNotNull(retval);
+            Assert.AreEqual(204, (int)retval.StatusCode);
+        }
+
+        /// <summary>
+        /// You can run this as an integration test against your own server
+        /// (Just uncomment the [TestMethod] attribute and rebuild)
+        /// </summary>
+        /// <returns></returns>
+        // [TestMethod]
+        public async Task Write_WithCredentialsAndValidMeasurementFields_IsSuccessful()
+        {
+            //  Arrange
+            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase, influxUser, influxPassword);
             Measurement m = new Measurement()
             {
                 Name = "unittest",
