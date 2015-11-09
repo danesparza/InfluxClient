@@ -9,8 +9,10 @@ namespace InfluxClient
     /// </summary>
     public class Measurement
     {
+        #region Constructors
+
         /// <summary>
-        /// The default constructor
+        /// Create a measurement
         /// </summary>
         public Measurement()
         {
@@ -27,6 +29,28 @@ namespace InfluxClient
             //  Initialize the timestamp
             Timestamp = DateTime.Now;
         }
+
+        /// <summary>
+        /// Create a measurement with the specified name
+        /// </summary>
+        /// <param name="name">The measurement name</param>
+        public Measurement(string name) : this()
+        {
+            Name = name;
+        }
+
+        /// <summary>
+        /// Create a measurement with the specified name and timestamp
+        /// </summary>
+        /// <param name="name">The measurement name</param>
+        /// <param name="timestamp">The date/time of the timestamp</param>
+        public Measurement(string name, DateTime timestamp) : this()
+        {
+            Name = name;
+            Timestamp = timestamp;
+        } 
+
+        #endregion
 
         /// <summary>
         /// The measurement name

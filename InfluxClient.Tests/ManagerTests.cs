@@ -11,8 +11,8 @@ namespace InfluxClient.Tests
     [TestClass]
     public class ManagerTests
     {
-        string influxEndpoint = "http://YOURSERVER:8086/";
-        string influxDatabase = "YOUR_DATABASE";
+        string influxEndpoint = "http://linux-dev:8086/";
+        string influxDatabase = "cb_stats";
         string influxUser = "unittest";
         string influxPassword = "unittest";
 
@@ -77,20 +77,12 @@ namespace InfluxClient.Tests
         /// (Just uncomment the [TestMethod] attribute and rebuild)
         /// </summary>
         /// <returns></returns>
-        // [TestMethod]
+        [TestMethod]
         public async Task Write_WithCredentialsAndValidMeasurementFields_IsSuccessful()
         {
             //  Arrange
             InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase, influxUser, influxPassword);
-            Measurement m = new Measurement()
-            {
-                Name = "unittest",
-                IntegerFields = new List<IntegerField>()
-                {
-                    new IntegerField() { Name="count", Value=44 }
-                },
-                Timestamp = DateTime.Parse("10/26/2015 13:48")
-            };
+            Measurement m = new Measurement("unittest").AddField("count", 42);
 
             //  Act
             Task<HttpResponseMessage> asyncretval = mgr.Write(m);
