@@ -28,5 +28,6 @@ var retval = await mgr.Write(m);
 Using authentication is as simple as passing in your username and password as part of the InfluxManager constructor:
 
 ```CSharp
+// Need to authenticate?  Just pass in the username and password as additional parameters:
 InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase, influxUser, influxPassword);
 ```
