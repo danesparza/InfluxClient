@@ -7,7 +7,7 @@ A .NET InfluxDB client that supports the [v0.9 API](https://influxdb.com/docs/v0
 In your application, call:
 
 ```CSharp
-// Instanciate the InfluxManager, passing your endpoint and target database:
+// Create the InfluxManager, passing the InfluxDB endpoint and target database:
 InfluxManager mgr = new InfluxManager("http://YOURSERVER:8086/", "YOUR_DATABASE");
 
 // Create a measurement (with at least one value)
@@ -28,6 +28,6 @@ var retval = await mgr.Write(m);
 Using authentication is as simple as passing in your username and password as part of the InfluxManager constructor:
 
 ```CSharp
-// Need to authenticate?  Just pass in the username and password as additional parameters:
+// To authenticate, create the InfluxManager with additional parameters:
 InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase, influxUser, influxPassword);
 ```
