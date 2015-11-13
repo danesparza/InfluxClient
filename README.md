@@ -1,5 +1,5 @@
 # InfluxClient
-A .NET [InfluxDB](https://influxdb.com/) client that supports the [v0.9 API](https://influxdb.com/docs/v0.9/introduction/overview.html), the [line protocol](https://influxdb.com/docs/v0.9/write_protocols/line.html) for efficient logging, and InfluxDB [authentication](https://influxdb.com/docs/v0.9/administration/authentication_and_authorization.html)
+A .NET [InfluxDB](https://influxdb.com/) client that supports asynchronous IO, the [v0.9 API](https://influxdb.com/docs/v0.9/introduction/overview.html), the [line protocol](https://influxdb.com/docs/v0.9/write_protocols/line.html) for efficient logging, and InfluxDB [authentication](https://influxdb.com/docs/v0.9/administration/authentication_and_authorization.html)
 
 [![Build status](https://ci.appveyor.com/api/projects/status/kab7aiacy0vjv1sr?svg=true)](https://ci.appveyor.com/project/danesparza/influxclient)
 
