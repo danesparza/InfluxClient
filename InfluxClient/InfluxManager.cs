@@ -65,6 +65,22 @@ namespace InfluxClient
         #endregion
 
         /// <summary>
+        /// Pings the InfluxDB database
+        /// </summary>
+        /// <returns></returns>
+        async public Task<HttpResponseMessage> Ping()
+        {
+            //  Create our url to ping
+            string url = string.Format("{0}/ping", _baseUrl);
+
+            //  Make an async call to get the response
+            using(HttpClient client = new HttpClient())
+            {
+                return await client.GetAsync(url);
+            }
+        }
+
+        /// <summary>
         /// Write a measurement to the InfluxDB database
         /// </summary>
         /// <param name="m">The measurement to write.  It must have at least one field specified</param>

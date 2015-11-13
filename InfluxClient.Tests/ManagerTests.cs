@@ -176,5 +176,25 @@ namespace InfluxClient.Tests
             Assert.IsNotNull(retval);
             Assert.AreEqual(204, (int)retval.StatusCode);
         }
+
+        /// <summary>
+        /// You can run this as an integration test against your own server
+        /// (Just uncomment the [TestMethod] attribute and rebuild)
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task Ping_IsSuccessful()
+        {
+            //  Arrange
+            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase, influxUser, influxPassword);
+
+            //  Act
+            HttpResponseMessage retval = await mgr.Ping();
+            
+            //  Assert
+            Assert.IsNotNull(retval);
+            Assert.AreEqual(204, (int)retval.StatusCode);
+            Assert.IsTrue(retval.Headers.Contains("X-Influxdb-Version"));
+        }
     }
 }
