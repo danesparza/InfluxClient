@@ -182,7 +182,7 @@ namespace InfluxClient.Tests
         /// (Just uncomment the [TestMethod] attribute and rebuild)
         /// </summary>
         /// <returns></returns>
-        [TestMethod]
+        // [TestMethod]
         public async Task Ping_IsSuccessful()
         {
             //  Arrange
