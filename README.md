@@ -4,6 +4,12 @@ A .NET [InfluxDB](https://influxdb.com/) client that supports asynchronous IO, t
 [![Build status](https://ci.appveyor.com/api/projects/status/kab7aiacy0vjv1sr?svg=true)](https://ci.appveyor.com/project/danesparza/influxclient)
 
 ### Quick Start
+Install the [NuGet package](https://www.nuget.org/packages/InfluxClient/) from the package manager console:
+
+```powershell
+Install-Package InfluxClient
+```
+#### Logging a measurement
 In your application, call:
 
 ```CSharp
