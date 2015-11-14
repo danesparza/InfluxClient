@@ -16,7 +16,7 @@ In your application, call:
 // Create the InfluxManager, passing the InfluxDB endpoint and target database:
 InfluxManager mgr = new InfluxManager("http://YOURSERVER:8086/", "YOUR_DATABASE");
 
-// Create a measurement (with at least one field value)
+// Create a measurement (with a name and at least one field name and value)
 Measurement m = new Measurement("unittest").AddField("count", 42);
 
 // Write the measurement (notice that this is awaitable):
@@ -30,7 +30,7 @@ Using authentication is as simple as passing in your username and password as pa
 // To authenticate, create the InfluxManager with additional parameters:
 InfluxManager mgr = new InfluxManager("http://YOURSERVER:8086/", "YOUR_DATABASE", "user", "password");
 
-// Continue normally ... create a measurement (with at least one field value)
+// Continue normally ... create a measurement (with a name and at least one field name and value)
 Measurement m = new Measurement("unittest").AddField("count", 42);
 
 // Write the measurement (notice that this is awaitable):
