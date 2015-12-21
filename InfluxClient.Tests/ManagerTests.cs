@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,10 +12,20 @@ namespace InfluxClient.Tests
     [TestClass]
     public class ManagerTests
     {
-        string influxEndpoint = "http://YOURSERVER:8086/";
-        string influxDatabase = "YOUR_DATABASE";
-        string influxUser = "unittest";
-        string influxPassword = "unittest";
+        private string _influxEndpoint = string.Empty;
+        private string _influxDatabase = string.Empty;
+        private string _influxUser = string.Empty;
+        private string _influxPassword = string.Empty;
+
+        [TestInitialize]
+        public void TestInit()
+        {
+            //  Read in our core settings from config:
+            _influxEndpoint = ConfigurationManager.AppSettings["influxEndpoint"];
+            _influxDatabase = ConfigurationManager.AppSettings["influxDatabase"];
+            _influxUser = ConfigurationManager.AppSettings["influxUser"];
+            _influxPassword = ConfigurationManager.AppSettings["influxPassword"];
+        }
 
         /// <summary>
         /// This test just verifies the field arguments.  It shouldn't matter
@@ -26,7 +37,7 @@ namespace InfluxClient.Tests
         public async Task Write_WithNoMeasurementFields_ThrowsException()
         {
             //  Arrange
-            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase);
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase);
 
             Measurement m = new Measurement()
             {
@@ -49,7 +60,7 @@ namespace InfluxClient.Tests
         public async Task Write_WithValidMeasurementFields_IsSuccessful()
         {
             //  Arrange
-            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase);
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase);
             Measurement m = new Measurement()
             {
                 Name = "unittest",
@@ -81,7 +92,7 @@ namespace InfluxClient.Tests
         public async Task Write_WithCredentialsAndValidMeasurementFields_IsSuccessful()
         {
             //  Arrange
-            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase, influxUser, influxPassword);
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase, _influxUser, _influxPassword);
             Measurement m = new Measurement("unittest").AddField("count", 42);
 
             //  Act
@@ -105,7 +116,7 @@ namespace InfluxClient.Tests
         public async Task Write_WithValidMeasurementFieldsNoTimestamp_IsSuccessful()
         {
             //  Arrange
-            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase);
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase);
             Measurement m = new Measurement()
             {
                 Name = "unittest",
@@ -136,7 +147,7 @@ namespace InfluxClient.Tests
         public async Task Write_WithMultipleValidMeasurementFieldsNoTimestamp_IsSuccessful()
         {
             //  Arrange
-            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase);
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase);
             List<Measurement> measurements = new List<Measurement>()
             {
                 new Measurement()
@@ -182,11 +193,11 @@ namespace InfluxClient.Tests
         /// (Just uncomment the [TestMethod] attribute and rebuild)
         /// </summary>
         /// <returns></returns>
-        // [TestMethod]
+        [TestMethod]
         public async Task Ping_IsSuccessful()
         {
             //  Arrange
-            InfluxManager mgr = new InfluxManager(influxEndpoint, influxDatabase, influxUser, influxPassword);
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase, _influxUser, _influxPassword);
 
             //  Act
             HttpResponseMessage retval = await mgr.Ping();
