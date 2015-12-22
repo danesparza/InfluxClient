@@ -7,6 +7,7 @@ namespace InfluxClient.Tests
     public class LineProtocolTests
     {
         [TestMethod]
+        [TestCategory("Format")]
         public void Format_WithValidMeasurement_IsSuccessful()
         {
             //  Arrange
@@ -29,6 +30,7 @@ namespace InfluxClient.Tests
         }
 
         [TestMethod]
+        [TestCategory("Format")]
         public void Format_WithNoTags_IsSuccessful()
         {
             //  Arrange

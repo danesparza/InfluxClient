@@ -33,6 +33,7 @@ namespace InfluxClient.Tests
         /// </summary>
         /// <returns></returns>
         [TestMethod]
+        [TestCategory("Write")]
         [ExpectedException(typeof(ArgumentException), "Should have complained about the lack of fields")]
         public async Task Write_WithNoMeasurementFields_ThrowsException()
         {
@@ -51,12 +52,8 @@ namespace InfluxClient.Tests
             Assert.IsNull(retval);
         }
 
-        /// <summary>
-        /// You can run this as an integration test against your own server
-        /// (Just uncomment the [TestMethod] attribute and rebuild)
-        /// </summary>
-        /// <returns></returns>
-        // [TestMethod]
+        [TestMethod]
+        [TestCategory("Write")]
         public async Task Write_WithValidMeasurementFields_IsSuccessful()
         {
             //  Arrange
@@ -83,12 +80,8 @@ namespace InfluxClient.Tests
             Assert.AreEqual(204, (int)retval.StatusCode);
         }
 
-        /// <summary>
-        /// You can run this as an integration test against your own server
-        /// (Just uncomment the [TestMethod] attribute and rebuild)
-        /// </summary>
-        /// <returns></returns>
-        // [TestMethod]
+        [TestMethod]
+        [TestCategory("Write")]
         public async Task Write_WithCredentialsAndValidMeasurementFields_IsSuccessful()
         {
             //  Arrange
@@ -107,12 +100,8 @@ namespace InfluxClient.Tests
             Assert.AreEqual(204, (int)retval.StatusCode);
         }
 
-        /// <summary>
-        /// You can run this as an integration test against your own server
-        /// (Just uncomment the [TestMethod] attribute and rebuild)
-        /// </summary>
-        /// <returns></returns>
-        // [TestMethod]
+        [TestMethod]
+        [TestCategory("Write")]
         public async Task Write_WithValidMeasurementFieldsNoTimestamp_IsSuccessful()
         {
             //  Arrange
@@ -138,12 +127,8 @@ namespace InfluxClient.Tests
             Assert.AreEqual(204, (int)retval.StatusCode);
         }
 
-        /// <summary>
-        /// You can run this as an integration test against your own server
-        /// (Just uncomment the [TestMethod] attribute and rebuild)
-        /// </summary>
-        /// <returns></returns>
-        // [TestMethod]
+        [TestMethod]
+        [TestCategory("Write")]
         public async Task Write_WithMultipleValidMeasurementFieldsNoTimestamp_IsSuccessful()
         {
             //  Arrange
@@ -194,6 +179,7 @@ namespace InfluxClient.Tests
         /// </summary>
         /// <returns></returns>
         [TestMethod]
+        [TestCategory("Ping")]
         public async Task Ping_IsSuccessful()
         {
             //  Arrange
