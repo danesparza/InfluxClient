@@ -209,5 +209,49 @@ namespace InfluxClient.Tests
             Assert.IsNotNull(data);
             Assert.IsTrue(data.Length > 0);
         }
+
+        [TestMethod]
+        [TestCategory("Query")]
+        public async Task QueryJSON_WithValidQueryButNonExistantField_ReturnsString()
+        {
+            //  Arrange
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase, _influxUser, _influxPassword);
+            string data = string.Empty;
+
+            //  Act
+            HttpResponseMessage retval = await mgr.QueryJSON("select bogusfield from unittest");
+            data = await retval.Content.ReadAsStringAsync();
+
+            //  Assert
+            Assert.IsNotNull(retval);
+            Assert.AreEqual(200, (int)retval.StatusCode);
+            Assert.IsTrue(retval.Headers.Contains("X-Influxdb-Version"));
+
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Length > 0);
+            Assert.IsTrue(data.Length < 20);
+        }
+
+        [TestMethod]
+        [TestCategory("Query")]
+        public async Task QueryJSON_WithInvalidDatabase_ReturnsErrorString()
+        {
+            //  Arrange
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, "invaliddatabase", _influxUser, _influxPassword);
+            string data = string.Empty;
+
+            //  Act
+            HttpResponseMessage retval = await mgr.QueryJSON("select bogusfield from unittest");
+            data = await retval.Content.ReadAsStringAsync();
+
+            //  Assert
+            Assert.IsNotNull(retval);
+            Assert.AreEqual(200, (int)retval.StatusCode);
+            Assert.IsTrue(retval.Headers.Contains("X-Influxdb-Version"));
+
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Length > 0);
+            Assert.IsTrue(data.Contains("error")); // The JSON should contain an error key
+        }
     }
 }
