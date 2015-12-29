@@ -253,5 +253,30 @@ namespace InfluxClient.Tests
             Assert.IsTrue(data.Length > 0);
             Assert.IsTrue(data.Contains("error")); // The JSON should contain an error key
         }
+
+        [TestMethod]
+        [TestCategory("Query")]
+        public async Task Query_WithValidQuery_ReturnsObject()
+        {
+            //  Arrange
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase, _influxUser, _influxPassword);
+            string data = string.Empty;
+
+            //  Act
+            var retval = await mgr.Query("select * from unittest");
+            
+            //  Assert
+            Assert.IsNotNull(retval);
+            Assert.IsTrue(retval.Results.Count > 0);
+            Assert.IsTrue(retval.Results[0].Series.Count > 0);
+
+            Assert.IsTrue(retval.Results[0].Series[0].Columns.Count > 1);       //  Check columns
+            Assert.AreEqual("time", retval.Results[0].Series[0].Columns[0]);
+            Assert.AreEqual("count", retval.Results[0].Series[0].Columns[1]);
+            Assert.AreEqual("element", retval.Results[0].Series[0].Columns[2]);
+
+            Assert.IsTrue(retval.Results[0].Series[0].Values.Count > 1);        //  Name and value count
+            Assert.AreEqual("unittest", retval.Results[0].Series[0].Name);
+        }
     }
 }

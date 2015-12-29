@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 
 namespace InfluxClient
 {
@@ -179,6 +180,42 @@ namespace InfluxClient
                 }
                 return await client.GetAsync(url);
             }
+        }
+
+        /// <summary>
+        /// Query the InfluxDB database and deserialize the returned data
+        /// to the specified object format
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize to.  See https://influxdb.com/docs/v0.9/guides/querying_data.html for the shape this should take</typeparam>
+        /// <param name="influxQL"></param>
+        /// <returns></returns>
+        async public Task<T> Query<T>(string influxQL)
+        {
+            //  The return value:
+            T retval = default(T);
+
+            //  Call the QueryJSON method to get the data back:
+            HttpResponseMessage response = await QueryJSON(influxQL);
+            string data = await response.Content.ReadAsStringAsync();
+
+            //  Serialize the data to the requested object
+            //  (it should take the shape of the returned JSON
+            //  https://influxdb.com/docs/v0.9/guides/querying_data.html)
+            JavaScriptSerializer jser = new JavaScriptSerializer();
+            retval = jser.Deserialize<T>(data);
+            
+            return retval;
+        }
+
+        /// <summary>
+        /// Query the InfluxDB database and deserialize the returned data
+        /// </summary>
+        /// <param name="influxQL"></param>
+        /// <returns></returns>
+        async public Task<QueryResponse> Query(string influxQL)
+        {
+            QueryResponse retval = await Query<QueryResponse>(influxQL);
+            return retval;
         }
 
         #region API helpers
