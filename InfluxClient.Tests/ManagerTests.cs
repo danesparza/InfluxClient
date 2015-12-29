@@ -173,11 +173,6 @@ namespace InfluxClient.Tests
             Assert.AreEqual(204, (int)retval.StatusCode);
         }
 
-        /// <summary>
-        /// You can run this as an integration test against your own server
-        /// (Just uncomment the [TestMethod] attribute and rebuild)
-        /// </summary>
-        /// <returns></returns>
         [TestMethod]
         [TestCategory("Ping")]
         public async Task Ping_IsSuccessful()
@@ -192,6 +187,27 @@ namespace InfluxClient.Tests
             Assert.IsNotNull(retval);
             Assert.AreEqual(204, (int)retval.StatusCode);
             Assert.IsTrue(retval.Headers.Contains("X-Influxdb-Version"));
+        }
+
+        [TestMethod]
+        [TestCategory("Query")]
+        public async Task QueryJSON_WithValidQuery_ReturnsString()
+        {
+            //  Arrange
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase, _influxUser, _influxPassword);
+            string data = string.Empty;
+
+            //  Act
+            HttpResponseMessage retval = await mgr.QueryJSON("select * from unittest");
+            data = await retval.Content.ReadAsStringAsync();
+
+            //  Assert
+            Assert.IsNotNull(retval);
+            Assert.AreEqual(200, (int)retval.StatusCode);
+            Assert.IsTrue(retval.Headers.Contains("X-Influxdb-Version"));
+
+            Assert.IsNotNull(data);
+            Assert.IsTrue(data.Length > 0);
         }
     }
 }

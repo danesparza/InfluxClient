@@ -160,6 +160,27 @@ namespace InfluxClient
             }
         }
 
+        /// <summary>
+        /// Query the InfluxDB database
+        /// </summary>
+        /// <param name="influxQL"></param>
+        /// <returns></returns>
+        async public Task<HttpResponseMessage> QueryJSON(string influxQL)
+        {
+            //  Create our url to query data with
+            string url = string.Format("{0}/query?db={1}&q={2}", _baseUrl, _database, influxQL);
+
+            //  Make an async call to get the response
+            using(HttpClient client = new HttpClient())
+            {
+                if(CredentialsHaveBeenSet())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetHttpBasicAuthCredentials());
+                }
+                return await client.GetAsync(url);
+            }
+        }
+
         #region API helpers
 
         /// <summary>
