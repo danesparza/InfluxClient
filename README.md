@@ -23,6 +23,35 @@ Measurement m = new Measurement("unittest").AddField("count", 42);
 var retval = await mgr.Write(m);
 ```
 
+#### Reading measurements
+Based on your provided [InfuxQL query](https://influxdb.com/docs/v0.9/query_language/data_exploration.html), InfluxDB passes data back in JSON format.  You can either get the raw string back or use the helper methods to get a native object back.  
+
+To get the JSON back:
+
+```CSharp
+// Create the InfluxManager, passing the InfluxDB endpoint and target database:
+InfluxManager mgr = new InfluxManager("http://YOURSERVER:8086/", "YOUR_DATABASE");
+
+// Pass in your InfluxQL query (notice that this is awaitable)
+HttpResponseMessage retval = await mgr.QueryJSON("select * from unittest");
+
+// Get the raw JSON data passed back:
+data = await retval.Content.ReadAsStringAsync();
+```
+
+To get a [QueryResponse](https://github.com/danesparza/InfluxClient/blob/master/InfluxClient/QueryResponse.cs) object back:
+
+```CSharp
+// Create the InfluxManager, passing the InfluxDB endpoint and target database:
+InfluxManager mgr = new InfluxManager("http://YOURSERVER:8086/", "YOUR_DATABASE");
+
+// Pass in your InfluxQL query (notice that this is awaitable)
+var retval = await mgr.Query("select * from unittest");
+
+// You now have your data back:
+string seriesTitle = retval.Results[0].Series[0].Name;
+```
+
 #### Using authentication
 Using authentication is as simple as passing in your username and password as part of the InfluxManager constructor:
 
