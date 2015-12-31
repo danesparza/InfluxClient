@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using InfluxClient.Fields;
@@ -38,7 +39,8 @@ namespace InfluxClient.Tests
         public async Task Write_WithNoMeasurementFields_ThrowsException()
         {
             //  Arrange
-            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase);
+            InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase, true);
+            //  ---- Note that we have to request exceptions in order to see this   ^^^^
 
             Measurement m = new Measurement()
             {
@@ -49,7 +51,7 @@ namespace InfluxClient.Tests
             var retval = await mgr.Write(m);
 
             //  Assert
-            Assert.IsNull(retval);
+            //  Should throw an exception and not get here
         }
 
         [TestMethod]

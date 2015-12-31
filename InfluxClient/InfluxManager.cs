@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -34,11 +36,17 @@ namespace InfluxClient
         private string _password = "";
 
         /// <summary>
+        /// Throw any exceptions encountered
+        /// </summary>
+        private bool _throwExceptions = false;
+
+        /// <summary>
         /// Creates a new InfluxDB manager
         /// </summary>
         /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
         /// <param name="database">The database to write to</param>
-        public InfluxManager(string influxEndpoint, string database)
+        /// <param name="throwExceptions">Whether or not to throw any exceptions for methods called on this instance</param>
+        public InfluxManager(string influxEndpoint, string database, bool throwExceptions = false)
         {
             //  If the endpoint has a trailing backslash, remove it:
             if(influxEndpoint.EndsWith("/"))
@@ -47,6 +55,9 @@ namespace InfluxClient
             //  Set the base url and database:
             _baseUrl = influxEndpoint;
             _database = database;
+
+            //  Set the bubble exceptions parameter:
+            _throwExceptions = throwExceptions;
         }
 
         /// <summary>
@@ -56,7 +67,8 @@ namespace InfluxClient
         /// <param name="database">The database to write to</param>
         /// <param name="username">The username to authenticate with</param>
         /// <param name="password">The password to authenticate with</param>
-        public InfluxManager(string influxEndpoint, string database, string username, string password) : this(influxEndpoint, database)
+        /// <param name="throwExceptions">Whether or not to throw any exceptions for methods called on this instance</param>
+        public InfluxManager(string influxEndpoint, string database, string username, string password, bool throwExceptions = false) : this(influxEndpoint, database, throwExceptions)
         {
             //  Set the username and password:
             _username = username;
@@ -71,14 +83,30 @@ namespace InfluxClient
         /// <returns></returns>
         async public Task<HttpResponseMessage> Ping()
         {
+            //  The default response message:
+            HttpResponseMessage retval = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             //  Create our url to ping
             string url = string.Format("{0}/ping", _baseUrl);
 
-            //  Make an async call to get the response
-            using(HttpClient client = new HttpClient())
+            try
             {
-                return await client.GetAsync(url);
+                //  Make an async call to get the response
+                using(HttpClient client = new HttpClient())
+                {
+                    retval = await client.GetAsync(url);
+                }
             }
+            catch(Exception ex)
+            {
+                Trace.TraceError("Ping {0} caused an exception: {1}", url, ex.Message);
+
+                //  Only re-throw if we've been configured to:
+                if(_throwExceptions)
+                    throw;
+            }
+
+            return retval;
         }
 
         /// <summary>
@@ -88,13 +116,20 @@ namespace InfluxClient
         /// <returns>An awaitable Task containing the HttpResponseMessage returned from the InfluxDB server</returns>
         async public Task<HttpResponseMessage> Write(Measurement m)
         {
+            //  The default response message:
+            HttpResponseMessage retval = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             //  Make sure the measurement has at least one field:
             if(!(m.BooleanFields.Any()
                 || m.FloatFields.Any()
                 || m.IntegerFields.Any()
                 || m.StringFields.Any()))
             {
-                throw new ArgumentException(string.Format("Measurement '{0}' needs at least one field value", m.Name));
+                string error = string.Format("Measurement '{0}' needs at least one field value", m.Name);
+                Trace.TraceError(error);
+
+                if(_throwExceptions)
+                    throw new ArgumentException(error);
             }
 
             //  Create our url to post data to
@@ -103,15 +138,28 @@ namespace InfluxClient
             //  Create our data to post:
             HttpContent content = new StringContent(LineProtocol.Format(m));
 
-            //  Make an async call to get the response
-            using(HttpClient client = new HttpClient())
+            try
             {
-                if(CredentialsHaveBeenSet())
+                //  Make an async call to get the response
+                using(HttpClient client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetHttpBasicAuthCredentials());
+                    if(CredentialsHaveBeenSet())
+                    {
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetHttpBasicAuthCredentials());
+                    }
+                    retval = await client.PostAsync(url, content);
                 }
-                return await client.PostAsync(url, content);
             }
+            catch(Exception ex)
+            {
+                Trace.TraceError("Write {0} caused an exception: {1}", url, ex.Message);
+
+                //  Only re-throw if we've been configured to:
+                if(_throwExceptions)
+                    throw;
+            }
+
+            return retval;
         }
 
         /// <summary>
@@ -121,6 +169,9 @@ namespace InfluxClient
         /// <returns>An awaitable Task containing the HttpResponseMessage returned from the InfluxDB server</returns>
         async public Task<HttpResponseMessage> Write(List<Measurement> listOfMeasurements)
         {
+            //  The default response message:
+            HttpResponseMessage retval = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+
             //  Create our url to post data to
             string url = string.Format("{0}/write?db={1}", _baseUrl, _database);
 
@@ -134,7 +185,11 @@ namespace InfluxClient
                     || m.IntegerFields.Any()
                     || m.StringFields.Any()))
                 {
-                    throw new ArgumentException(string.Format("Measurement '{0}' needs at least one field value", m.Name));
+                    string error = string.Format("Measurement '{0}' needs at least one field value", m.Name);
+                    Trace.TraceError(error);
+
+                    if(_throwExceptions)
+                        throw new ArgumentException(error);
                 }
 
                 sb.AppendFormat("{0}\n", LineProtocol.Format(m));
@@ -150,15 +205,28 @@ namespace InfluxClient
             //  Create our data to post:
             HttpContent content = new StringContent(sb.ToString());
 
-            //  Make an async call to get the response
-            using(HttpClient client = new HttpClient())
+            try
             {
-                if(CredentialsHaveBeenSet())
+                //  Make an async call to get the response
+                using(HttpClient client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetHttpBasicAuthCredentials());
+                    if(CredentialsHaveBeenSet())
+                    {
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", GetHttpBasicAuthCredentials());
+                    }
+                    retval = await client.PostAsync(url, content);
                 }
-                return await client.PostAsync(url, content);
             }
+            catch(Exception ex)
+            {
+                Trace.TraceError("Write (list) {0} caused an exception: {1}", url, ex.Message);
+
+                //  Only re-throw if we've been configured to:
+                if(_throwExceptions)
+                    throw;
+            }
+
+            return retval;
         }
 
         /// <summary>
