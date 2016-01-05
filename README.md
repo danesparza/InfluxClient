@@ -23,6 +23,19 @@ Measurement m = new Measurement("unittest").AddField("count", 42);
 var retval = await mgr.Write(m);
 ```
 
+#### Exceptions
+Logging and telemetry is usually a secondary function in an application -- so by default, InfluxClient tries to be as quiet as possible when handling error conditions.  InfluxClient won't throw exceptions for anything unless you indicate it's OK to do so. 
+
+You can control this behavior in the constructor:
+
+```CSharp
+// Create the influx client and indicate we want to have exceptions bubble up:
+InfluxManager mgr = new InfluxManager(_influxEndpoint, _influxDatabase, true);
+// Just add a parameter to your constructor                             ^^^^
+```
+
+The client will always try to signal with `Trace` output when something goes wrong -- so you should be able to trap this in your application logging toolkit (or see it in your debugging output) without too much effort -- even if you have exceptions turned off.
+
 #### Reading measurements
 Based on your provided [InfuxQL query](https://influxdb.com/docs/v0.9/query_language/data_exploration.html), InfluxDB passes data back in JSON format.  You can either get the raw string back or use the helper methods to get a native object back.  
 
