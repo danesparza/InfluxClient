@@ -9,6 +9,9 @@ Install the [NuGet package](https://www.nuget.org/packages/InfluxClient/) from t
 ```powershell
 Install-Package InfluxClient
 ```
+
+Be sure your project has a reference to `System.Net.Http` (for the [HttpResponseMessage](https://msdn.microsoft.com/en-us/library/system.net.http.httpresponsemessage(v=vs.118).aspx) class)
+
 #### Logging a measurement
 In your application, call:
 
