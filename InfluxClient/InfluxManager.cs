@@ -47,21 +47,9 @@ namespace InfluxClient
         /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
         /// <param name="database">The database to write to</param>
         /// <param name="throwExceptions">Whether or not to throw any exceptions for methods called on this instance</param>
-        public InfluxManager(string influxEndpoint, string database, bool throwExceptions = false)
-        {
-            //  If the endpoint has a trailing backslash, remove it:
-            if(influxEndpoint.EndsWith("/"))
-            { influxEndpoint = influxEndpoint.Remove(influxEndpoint.LastIndexOf("/")); }
-
-            //  Set the base url and database:
-            _baseUrl = influxEndpoint;
-            _database = database;
-
-            //  Set the bubble exceptions parameter:
-            if (throwExceptions)
-            {
-                _exceptionHandler = (exception, s, values) => { ExceptionDispatchInfo.Capture(exception).Throw(); };
-            }
+        public InfluxManager(string influxEndpoint, string database, bool throwExceptions = false) 
+            : this(influxEndpoint, database, DetermineDefaultExceptionHandler(throwExceptions))
+        { 
         }
 
         /// <summary>
@@ -72,7 +60,41 @@ namespace InfluxClient
         /// <param name="username">The username to authenticate with</param>
         /// <param name="password">The password to authenticate with</param>
         /// <param name="throwExceptions">Whether or not to throw any exceptions for methods called on this instance</param>
-        public InfluxManager(string influxEndpoint, string database, string username, string password, bool throwExceptions = false) : this(influxEndpoint, database, throwExceptions)
+        public InfluxManager(string influxEndpoint, string database, string username, string password, bool throwExceptions = false) 
+            : this(influxEndpoint, database, username, password, DetermineDefaultExceptionHandler(throwExceptions))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new InfluxDB manager
+        /// </summary>
+        /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
+        /// <param name="database">The database to write to</param>
+        /// <param name="exceptionHandler">Action to handle exceptions</param>
+        public InfluxManager(string influxEndpoint, string database, Action<Exception, string, object[]> exceptionHandler)
+        {
+            //  If the endpoint has a trailing backslash, remove it:
+            if (influxEndpoint.EndsWith("/"))
+            { influxEndpoint = influxEndpoint.Remove(influxEndpoint.LastIndexOf("/")); }
+
+            //  Set the base url and database:
+            _baseUrl = influxEndpoint;
+            _database = database;
+
+            //  Set the bubble exceptions parameter:
+            _exceptionHandler = exceptionHandler;
+        }
+
+        /// <summary>
+        /// Creates a new InfuxDB manager with authentication credentials
+        /// </summary>
+        /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
+        /// <param name="database">The database to write to</param>
+        /// <param name="username">The username to authenticate with</param>
+        /// <param name="password">The password to authenticate with</param>
+        /// <param name="exceptionHandler">Action to handle exceptions</param>
+        public InfluxManager(string influxEndpoint, string database, string username, string password,
+            Action<Exception, string, object[]> exceptionHandler) : this(influxEndpoint, database, exceptionHandler)
         {
             //  Set the username and password:
             _username = username;
@@ -285,6 +307,16 @@ namespace InfluxClient
         private void LogError(Exception exception, string message, params object[] values)
         {
             _exceptionHandler(exception, message, values);
+        }
+
+        private static Action<Exception, string, object[]> DetermineDefaultExceptionHandler(bool throwExceptions)
+        {
+            if (throwExceptions)
+            {
+                return (exception, s, values) => { ExceptionDispatchInfo.Capture(exception).Throw(); };
+            }
+
+            return (exception, s, values) => { };
         }
 
         #region API helpers
