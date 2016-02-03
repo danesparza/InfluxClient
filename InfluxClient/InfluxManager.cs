@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
@@ -36,9 +37,9 @@ namespace InfluxClient
         private string _password = "";
 
         /// <summary>
-        /// Throw any exceptions encountered
+        /// Action to tun when there is an exception
         /// </summary>
-        private bool _throwExceptions = false;
+        private Action<Exception, string, object[]> _exceptionHandler = (exception, s, values) => { };
 
         /// <summary>
         /// Creates a new InfluxDB manager
@@ -57,7 +58,10 @@ namespace InfluxClient
             _database = database;
 
             //  Set the bubble exceptions parameter:
-            _throwExceptions = throwExceptions;
+            if (throwExceptions)
+            {
+                _exceptionHandler = (exception, s, values) => { ExceptionDispatchInfo.Capture(exception).Throw(); };
+            }
         }
 
         /// <summary>
@@ -101,9 +105,7 @@ namespace InfluxClient
             {
                 Trace.TraceError("Ping {0} caused an exception: {1}", url, ex.Message);
 
-                //  Only re-throw if we've been configured to:
-                if(_throwExceptions)
-                    throw;
+                LogError(ex, "Ping {0} caused an exception: {1}", url, ex.Message);
             }
 
             return retval;
@@ -128,8 +130,7 @@ namespace InfluxClient
                 string error = string.Format("Measurement '{0}' needs at least one field value", m.Name);
                 Trace.TraceError(error);
 
-                if(_throwExceptions)
-                    throw new ArgumentException(error);
+                LogError(new ApplicationException(error), error);
             }
 
             //  Create our url to post data to
@@ -154,9 +155,7 @@ namespace InfluxClient
             {
                 Trace.TraceError("Write {0} caused an exception: {1}", url, ex.Message);
 
-                //  Only re-throw if we've been configured to:
-                if(_throwExceptions)
-                    throw;
+                LogError(ex, "Write {0} caused an exception: {1}", url, ex.Message);
             }
 
             return retval;
@@ -188,8 +187,7 @@ namespace InfluxClient
                     string error = string.Format("Measurement '{0}' needs at least one field value", m.Name);
                     Trace.TraceError(error);
 
-                    if(_throwExceptions)
-                        throw new ArgumentException(error);
+                    LogError(new ArgumentException(error), "Measurement '{0}' needs at least one field value", m.Name);
                 }
 
                 sb.AppendFormat("{0}\n", LineProtocol.Format(m));
@@ -221,9 +219,7 @@ namespace InfluxClient
             {
                 Trace.TraceError("Write (list) {0} caused an exception: {1}", url, ex.Message);
 
-                //  Only re-throw if we've been configured to:
-                if(_throwExceptions)
-                    throw;
+                LogError(ex, "Write (list) {0} caused an exception: {1}", url, ex.Message);
             }
 
             return retval;
@@ -284,6 +280,11 @@ namespace InfluxClient
         {
             QueryResponse retval = await Query<QueryResponse>(influxQL);
             return retval;
+        }
+
+        private void LogError(Exception exception, string message, params object[] values)
+        {
+            _exceptionHandler(exception, message, values);
         }
 
         #region API helpers
