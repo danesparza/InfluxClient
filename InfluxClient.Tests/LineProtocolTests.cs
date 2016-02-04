@@ -14,7 +14,7 @@ namespace InfluxClient.Tests
             Measurement m = new Measurement()
             {
                 Name = "cpu",
-                Timestamp = DateTime.Parse("10/26/2015 13:48Z")
+                Timestamp = DateTime.Parse("2015-10-26 13:48Z")
             };
             m.AddTag("host", "server01").AddTag("region", "us-west");
             m.AddField("alarm", false).AddField("Message", "Testing messages");
@@ -37,7 +37,7 @@ namespace InfluxClient.Tests
             Measurement m = new Measurement()
             {
                 Name = "cpu",
-                Timestamp = DateTime.Parse("10/26/2015 13:48Z")
+                Timestamp = DateTime.Parse("2015-10-26 13:48Z")
             };
             m.AddField("alarm", false).AddField("Message", "Testing messages");
 
