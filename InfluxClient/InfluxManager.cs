@@ -152,7 +152,7 @@ namespace InfluxClient
                 string error = string.Format("Measurement '{0}' needs at least one field value", m.Name);
                 Trace.TraceError(error);
 
-                LogError(new ApplicationException(error), error);
+                LogError(new ArgumentException(error), error);
             }
 
             //  Create our url to post data to
