@@ -304,11 +304,22 @@ namespace InfluxClient
             return retval;
         }
 
+        /// <summary>
+        /// Wraps _exceptionHandler Action to allow for using params
+        /// </summary>
+        /// <param name="exception">Exception to log</param>
+        /// <param name="message">Message template to log</param>
+        /// <param name="values">Values to populate the message template</param>
         private void LogError(Exception exception, string message, params object[] values)
         {
             _exceptionHandler(exception, message, values);
         }
 
+        /// <summary>
+        /// Turn throwExceptions into an action that will throw the action if required. This is adapter for the previous constructor to new action constructor.
+        /// </summary>
+        /// <param name="throwExceptions">True will return an action that throws the exception. False will return an action that swallows the exception.</param>
+        /// <returns></returns>
         private static Action<Exception, string, object[]> DetermineDefaultExceptionHandler(bool throwExceptions)
         {
             if (throwExceptions)
