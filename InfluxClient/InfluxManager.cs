@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
@@ -36,9 +37,9 @@ namespace InfluxClient
         private string _password = "";
 
         /// <summary>
-        /// Throw any exceptions encountered
+        /// Action to tun when there is an exception
         /// </summary>
-        private bool _throwExceptions = false;
+        private Action<Exception, string, object[]> _exceptionHandler = (exception, s, values) => { };
 
         /// <summary>
         /// Creates a new InfluxDB manager
@@ -46,18 +47,9 @@ namespace InfluxClient
         /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
         /// <param name="database">The database to write to</param>
         /// <param name="throwExceptions">Whether or not to throw any exceptions for methods called on this instance</param>
-        public InfluxManager(string influxEndpoint, string database, bool throwExceptions = false)
-        {
-            //  If the endpoint has a trailing backslash, remove it:
-            if(influxEndpoint.EndsWith("/"))
-            { influxEndpoint = influxEndpoint.Remove(influxEndpoint.LastIndexOf("/")); }
-
-            //  Set the base url and database:
-            _baseUrl = influxEndpoint;
-            _database = database;
-
-            //  Set the bubble exceptions parameter:
-            _throwExceptions = throwExceptions;
+        public InfluxManager(string influxEndpoint, string database, bool throwExceptions = false) 
+            : this(influxEndpoint, database, DetermineDefaultExceptionHandler(throwExceptions))
+        { 
         }
 
         /// <summary>
@@ -68,7 +60,41 @@ namespace InfluxClient
         /// <param name="username">The username to authenticate with</param>
         /// <param name="password">The password to authenticate with</param>
         /// <param name="throwExceptions">Whether or not to throw any exceptions for methods called on this instance</param>
-        public InfluxManager(string influxEndpoint, string database, string username, string password, bool throwExceptions = false) : this(influxEndpoint, database, throwExceptions)
+        public InfluxManager(string influxEndpoint, string database, string username, string password, bool throwExceptions = false) 
+            : this(influxEndpoint, database, username, password, DetermineDefaultExceptionHandler(throwExceptions))
+        {
+        }
+
+        /// <summary>
+        /// Creates a new InfluxDB manager
+        /// </summary>
+        /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
+        /// <param name="database">The database to write to</param>
+        /// <param name="exceptionHandler">Action to handle exceptions</param>
+        public InfluxManager(string influxEndpoint, string database, Action<Exception, string, object[]> exceptionHandler)
+        {
+            //  If the endpoint has a trailing backslash, remove it:
+            if (influxEndpoint.EndsWith("/"))
+            { influxEndpoint = influxEndpoint.Remove(influxEndpoint.LastIndexOf("/")); }
+
+            //  Set the base url and database:
+            _baseUrl = influxEndpoint;
+            _database = database;
+
+            //  Set the bubble exceptions parameter:
+            _exceptionHandler = exceptionHandler;
+        }
+
+        /// <summary>
+        /// Creates a new InfuxDB manager with authentication credentials
+        /// </summary>
+        /// <param name="influxEndpoint">The influxdb endpoint, including the port (if any)</param>
+        /// <param name="database">The database to write to</param>
+        /// <param name="username">The username to authenticate with</param>
+        /// <param name="password">The password to authenticate with</param>
+        /// <param name="exceptionHandler">Action to handle exceptions</param>
+        public InfluxManager(string influxEndpoint, string database, string username, string password,
+            Action<Exception, string, object[]> exceptionHandler) : this(influxEndpoint, database, exceptionHandler)
         {
             //  Set the username and password:
             _username = username;
@@ -101,9 +127,7 @@ namespace InfluxClient
             {
                 Trace.TraceError("Ping {0} caused an exception: {1}", url, ex.Message);
 
-                //  Only re-throw if we've been configured to:
-                if(_throwExceptions)
-                    throw;
+                LogError(ex, "Ping {0} caused an exception: {1}", url, ex.Message);
             }
 
             return retval;
@@ -128,8 +152,7 @@ namespace InfluxClient
                 string error = string.Format("Measurement '{0}' needs at least one field value", m.Name);
                 Trace.TraceError(error);
 
-                if(_throwExceptions)
-                    throw new ArgumentException(error);
+                LogError(new ArgumentException(error), error);
             }
 
             //  Create our url to post data to
@@ -154,9 +177,7 @@ namespace InfluxClient
             {
                 Trace.TraceError("Write {0} caused an exception: {1}", url, ex.Message);
 
-                //  Only re-throw if we've been configured to:
-                if(_throwExceptions)
-                    throw;
+                LogError(ex, "Write {0} caused an exception: {1}", url, ex.Message);
             }
 
             return retval;
@@ -188,8 +209,7 @@ namespace InfluxClient
                     string error = string.Format("Measurement '{0}' needs at least one field value", m.Name);
                     Trace.TraceError(error);
 
-                    if(_throwExceptions)
-                        throw new ArgumentException(error);
+                    LogError(new ArgumentException(error), "Measurement '{0}' needs at least one field value", m.Name);
                 }
 
                 sb.AppendFormat("{0}\n", LineProtocol.Format(m));
@@ -221,9 +241,7 @@ namespace InfluxClient
             {
                 Trace.TraceError("Write (list) {0} caused an exception: {1}", url, ex.Message);
 
-                //  Only re-throw if we've been configured to:
-                if(_throwExceptions)
-                    throw;
+                LogError(ex, "Write (list) {0} caused an exception: {1}", url, ex.Message);
             }
 
             return retval;
@@ -284,6 +302,32 @@ namespace InfluxClient
         {
             QueryResponse retval = await Query<QueryResponse>(influxQL);
             return retval;
+        }
+
+        /// <summary>
+        /// Wraps _exceptionHandler Action to allow for using params
+        /// </summary>
+        /// <param name="exception">Exception to log</param>
+        /// <param name="message">Message template to log</param>
+        /// <param name="values">Values to populate the message template</param>
+        private void LogError(Exception exception, string message, params object[] values)
+        {
+            _exceptionHandler(exception, message, values);
+        }
+
+        /// <summary>
+        /// Turn throwExceptions into an action that will throw the action if required. This is adapter for the previous constructor to new action constructor.
+        /// </summary>
+        /// <param name="throwExceptions">True will return an action that throws the exception. False will return an action that swallows the exception.</param>
+        /// <returns></returns>
+        private static Action<Exception, string, object[]> DetermineDefaultExceptionHandler(bool throwExceptions)
+        {
+            if (throwExceptions)
+            {
+                return (exception, s, values) => { ExceptionDispatchInfo.Capture(exception).Throw(); };
+            }
+
+            return (exception, s, values) => { };
         }
 
         #region API helpers

@@ -67,7 +67,7 @@ namespace InfluxClient.Tests
                 {
                     new IntegerField() { Name="count", Value=44 }
                 },
-                Timestamp = DateTime.Parse("10/26/2015 13:48")
+                Timestamp = DateTime.Parse("2015-10-26 13:48")
             };
 
             //  Act
