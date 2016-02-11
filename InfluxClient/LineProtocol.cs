@@ -62,7 +62,7 @@ namespace InfluxClient
 
             return retval.ToString();
         }
-
+ 
         /// <summary>
         /// Escapes strings properly for the line protocol
         /// </summary>
@@ -77,6 +77,9 @@ namespace InfluxClient
 
             //  Escape commas
             retval = retval.Replace(",", @"\,");
+
+            //  Escape equal sign
+            retval = retval.Replace("=", @"\=");
 
             return retval;
         }
