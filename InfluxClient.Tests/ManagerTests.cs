@@ -229,9 +229,10 @@ namespace InfluxClient.Tests
             Assert.AreEqual(200, (int)retval.StatusCode);
             Assert.IsTrue(retval.Headers.Contains("X-Influxdb-Version"));
 
-            Assert.IsNotNull(data);
-            Assert.IsTrue(data.Length > 0);
-            Assert.IsTrue(data.Length < 20);
+            Assert.IsNotNull(data); // We shouldn't have null
+            Assert.IsTrue(data.Length > 0); // We should have something
+            Assert.IsTrue(data.Length < 40); // Just not much
+            Assert.IsFalse(data.Contains("error")); //  This shouldn't result in an error
         }
 
         [TestMethod]
