@@ -10,7 +10,7 @@
         <projectUrl>https://github.com/danesparza/InfluxClient</projectUrl>
         <iconUrl>https://raw.githubusercontent.com/danesparza/InfluxClient/master/Influx.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>InfluxDB client that supports asynchronous IO, the v0.9 API, the line protocol for efficient logging, and InfluxDB authentication</description>
+        <description>Influx DB / InfluxData client that supports asynchronous IO, the v0.9 API, the line protocol for efficient logging, and InfluxDB authentication</description>
         <releaseNotes>Please see the project site for updated release notes</releaseNotes>
         <copyright>Copyright 2015 Dan Esparza</copyright>
         <language>en-US</language>
