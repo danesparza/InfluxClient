@@ -126,7 +126,7 @@ namespace InfluxClient
         /// <param name="name"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public Measurement AddField(string name, float value)
+        public Measurement AddField(string name, double value)
         {
             this.FloatFields.Add(new FloatField() { Name = name, Value = value });
             return this;

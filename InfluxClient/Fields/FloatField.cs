@@ -5,7 +5,7 @@
         public string Name
         { get; set; }
 
-        public float Value
+        public double Value
         { get; set; }
     }
 }
