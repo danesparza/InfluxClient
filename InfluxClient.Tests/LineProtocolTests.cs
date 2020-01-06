@@ -73,5 +73,30 @@ namespace InfluxClient.Tests
             Assert.AreEqual<string>(expectedFormat, retval);
         }
 
+        [TestMethod]
+        [TestCategory("Format")]
+        public void Float64bit()
+        {
+            // Make sure correct decimal symbol is used in test case
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            //  Arrange
+            Measurement m = new Measurement()
+            {
+                Name = "foo",
+                Timestamp = DateTime.Parse("2020-01-02 16:08Z")
+            };
+            m.AddField("float_max", float.MaxValue).AddField("double_max", double.MaxValue);
+
+            string expectedFormat = "foo float_max=3.40282346638529E+38,double_max=1.79769313486232E+308 1577981280000000000"; // TODO Variant
+            string retval = string.Empty;
+
+            //  Act
+            retval = LineProtocol.Format(m);
+
+            //  Assert
+            Assert.AreEqual<string>(expectedFormat, retval);
+        }
+
     }
 }
