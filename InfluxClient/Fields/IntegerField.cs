@@ -5,7 +5,7 @@
         public string Name
         { get; set; }
 
-        public int Value
+        public long Value
         { get; set; }
     }
 }
