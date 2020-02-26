@@ -75,6 +75,28 @@ namespace InfluxClient.Tests
 
         [TestMethod]
         [TestCategory("Format")]
+        public void Integer64bit()
+        {
+            //  Arrange
+            Measurement m = new Measurement()
+            {
+                Name = "foo",
+                Timestamp = DateTime.Parse("2020-02-21 08:27Z")
+            };
+            m.AddField("int_max", int.MaxValue).AddField("long_max", long.MaxValue);
+
+            string expectedFormat = "foo int_max=2147483647i,long_max=9223372036854775807i 1582273620000000000";
+            string retval = string.Empty;
+
+            //  Act
+            retval = LineProtocol.Format(m);
+
+            //  Assert
+            Assert.AreEqual<string>(expectedFormat, retval);
+        }
+
+        [TestMethod]
+        [TestCategory("Format")]
         public void Float64bit()
         {
             // Make sure correct decimal symbol is used in test case

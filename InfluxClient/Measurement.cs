@@ -114,7 +114,7 @@ namespace InfluxClient
         /// <param name="name"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public Measurement AddField(string name, int value)
+        public Measurement AddField(string name, long value)
         {
             this.IntegerFields.Add(new IntegerField() { Name = name, Value = value });
             return this;
